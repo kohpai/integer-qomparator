@@ -6,6 +6,7 @@ from qiskit_aer import AerSimulator
 
 
 class TestQomparator(unittest.TestCase):
+
     def test_qubits_from_negative_integer(self):
         integer = -5
 
