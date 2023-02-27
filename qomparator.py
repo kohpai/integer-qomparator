@@ -9,4 +9,6 @@ def qubits_from_integer(nbits, integer):
         if integer & (1 << i):
             circuit.x(qr[i])
 
-    return circuit.to_gate()
+    u = circuit.to_gate()
+    u.name = "INT"
+    return u
