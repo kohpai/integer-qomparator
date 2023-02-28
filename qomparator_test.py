@@ -37,11 +37,11 @@ class TestQomparator(unittest.TestCase):
         self.assertEqual(10, counts['0101'])
 
     def test_largest_number(self):
-        self.assertEqual(7, qmp.largest_number(5, 7))
-        self.assertEqual(5, qmp.largest_number(5, -63))
-        self.assertEqual(0, qmp.largest_number(-5, 0))
-        self.assertEqual(5000, qmp.largest_number(5000, 200))
-        self.assertEqual(200, qmp.largest_number(-5000, 200))
+        self.assertEqual(7, qmp.find_the_largest_number(5, 7))
+        self.assertEqual(5, qmp.find_the_largest_number(5, -63))
+        self.assertEqual(0, qmp.find_the_largest_number(-5, 0))
+        self.assertEqual(5000, qmp.find_the_largest_number(5000, 200))
+        self.assertEqual(200, qmp.find_the_largest_number(-5000, 200))
 
 
 if __name__ == '__main__':
