@@ -55,25 +55,6 @@ def ripple_carry(nbits):
     return u
 
 
-# def adder(nbits):
-#     c0 = QuantumRegister(1)
-#     a = QuantumRegister(nbits)
-#     b = QuantumRegister(nbits)
-#     z = QuantumRegister(1)
-#     circuit = QuantumCircuit(c0, a, b, z)
-#
-#     circuit.append(ripple_carry(nbits), c0[:] + a[:] + b[:])
-#     circuit.cx(a[nbits - 1], z[0])
-#
-#     for i in range(nbits - 1, -1, -1):
-#         carry = c0[0] if i == 0 else a[i - 1]
-#         circuit.append(unmajority_and_add(), [carry, b[i], a[i]])
-#
-#     u = circuit.to_gate()
-#     u.name = "ADD"
-#     return u
-
-
 def find_the_largest_number(a, b):
     # set the number of qubits
     nbits = 32
@@ -84,23 +65,26 @@ def find_the_largest_number(a, b):
     cr = ClassicalRegister(1, name='msb')
     circuit = QuantumCircuit(c0, ar, br, cr)
 
-    # convert a and -b to qubits
+    # convert a and b to qubits
     circuit.append(qubits_from_integer(nbits, a), ar)
-    circuit.append(qubits_from_integer(nbits, -b), br)
+    circuit.append(qubits_from_integer(nbits, b), br)
+    # convert b to -b
+    # -b = ~b + 1, where 1 comes from c0
+    circuit.x(br)
+    circuit.x(c0)
 
-    # compute the MSB of a + (-b)
+    # compute the MSB of a + (-b) = a - b
     circuit.append(ripple_carry(nbits), c0[:] + ar[:] + br[:])
     circuit.append(unmajority_and_add(),
                    [ar[nbits - 2], br[nbits - 1], ar[nbits - 1]])
     circuit.measure(br[nbits - 1], cr)
 
     # Print the circuit
-    # print(circuit)
-    print(circuit.decompose(["INT", "RIPL"]))
-    # print(circuit.decompose(["INT", "RIPL"]).decompose(["MAJ", "UMA"]))
+    # print(circuit.decompose(["INT", "RIPL"]))
 
     # Simulate the circuit
     simulator = AerSimulator()
     counts = qiskit.execute(circuit, simulator,
                             shots=1).result().get_counts(circuit)
+    # a < b iff the MSB of a - b is 1
     return b if '1' in counts else a
