@@ -1,4 +1,6 @@
-from qiskit import QuantumCircuit, QuantumRegister
+import qiskit
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
+from qiskit_aer import AerSimulator
 
 
 def qubits_from_integer(nbits, integer):
@@ -26,19 +28,19 @@ def majority():
     return u
 
 
-# def unmajority_and_add():
-#     qr = QuantumRegister(3)
-#     circuit = QuantumCircuit(qr)
-#     circuit.ccx(qr[0], qr[1], qr[2])
-#     circuit.cx(qr[2], qr[0])
-#     circuit.cx(qr[0], qr[1])
-#
-#     u = circuit.to_gate()
-#     u.name = "UMA"
-#     return u
+def unmajority_and_add():
+    qr = QuantumRegister(3)
+    circuit = QuantumCircuit(qr)
+    circuit.ccx(qr[0], qr[1], qr[2])
+    circuit.cx(qr[2], qr[0])
+    circuit.cx(qr[0], qr[1])
+
+    u = circuit.to_gate()
+    u.name = "UMA"
+    return u
 
 
-def adder(nbits):
+def ripple_carry(nbits):
     c0 = QuantumRegister(1)
     a = QuantumRegister(nbits)
     b = QuantumRegister(nbits)
@@ -58,3 +60,26 @@ def adder(nbits):
     u = circuit.to_gate()
     u.name = "ADD"
     return u
+
+
+def largest_number(a, b):
+    nbits = 32
+    c0 = QuantumRegister(1)
+    ar = QuantumRegister(nbits)
+    br = QuantumRegister(nbits)
+    cr = ClassicalRegister(1)
+    circuit = QuantumCircuit(c0, ar, br, cr)
+
+    circuit.append(qubits_from_integer(nbits, a), ar)
+    circuit.append(qubits_from_integer(nbits, -b), br)
+
+    circuit.append(ripple_carry(nbits), c0[:] + ar[:] + br[:])
+    circuit.append(unmajority_and_add(),
+                   [ar[nbits - 2], br[nbits - 1], ar[nbits - 1]])
+    circuit.measure(br[nbits - 1], cr)
+
+    simulator = AerSimulator()
+    counts = qiskit.execute(circuit, simulator,
+                            shots=10).result().get_counts(circuit)
+    print(counts)
+    return b if '1' in counts else a
